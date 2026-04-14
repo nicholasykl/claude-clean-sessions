@@ -5,6 +5,10 @@
 
 I kept manually deleting `.jsonl` files under `~/.claude/projects/` to stop my Claude Code history from bloating forever. Wrote this little slash command so I could stop. Figured others might find it useful.
 
+The Claude Code desktop app has its own session UI — this is for those of us living in the terminal.
+
+There's plenty of solid work out there already for cleaning up Claude Code sessions; none had the exact mix I wanted, so I built mine.
+
 **It's a personal tool, not a product — works well for me, YMMV.** Open an issue if something breaks on your setup and I'll take a look when I can.
 
 ## What it does
