@@ -1,22 +1,23 @@
 # claude-clean-sessions
 
-A Claude Code slash command for managing your session history with a **soft-delete trash**, **5-day recovery window**, **age-bucket triage**, and **paginated browsing**. All running Claude Code sessions are auto-detected and protected from accidental deletion.
+![license: MIT](https://img.shields.io/badge/license-MIT-blue)
+![platform: macOS · Linux](https://img.shields.io/badge/platform-macOS%20%C2%B7%20Linux-lightgrey)
 
-## Why
+I kept manually deleting `.jsonl` files under `~/.claude/projects/` to stop my Claude Code history from bloating forever. Wrote this little slash command so I could stop. Figured others might find it useful.
 
-Claude Code stores every session transcript as a `.jsonl` file under `~/.claude/projects/<encoded-cwd>/`. These accumulate forever — there is no built-in cleanup. Once you have hundreds of sessions, scrolling through them all just to delete a few is painful. This command gives you a safe, interactive, token-efficient way to prune them.
+**It's a personal tool, not a product — works well for me, YMMV.** Open an issue if something breaks on your setup and I'll take a look when I can.
 
-## Features
+## What it does
 
-- **Age-bucket triage** — summary groups sessions by `This week / Recent / Old / Archive` so you can act on the oldest ones with one click
-- **One-click bulk delete** — "Delete everything older than 30 days" removes a whole bucket after confirmation
-- **Paginated browse** — 20 sessions per page, oldest first; supports `Pick`, `Delete all on this page`, `Delete all (except protected)`, `Next/Previous page`
-- **Soft delete** — trashed sessions land in `~/.claude/.session-trash/<YYYY-MM-DD>/`, recoverable for 5 days
-- **Auto-purge** — trash older than 5 days is silently removed on each run
-- **Multi-session safe** — detects *all* currently-running Claude Code processes via `ps` + `lsof` and refuses to trash their active sessions (not just the invoker's session)
-- **Restore flow** — pick by number from the trash list; refuses to overwrite conflicts
-- **Audit log** — every move/delete/restore appended to `~/.claude/session-cleanup.log`
-- **Token-efficient** — Python renders all lists and menus directly; Claude only echoes pre-formatted markdown and invokes `AskUserQuestion`. ~65% less token usage than a naive JSON-in-Claude-formats-out design.
+A `/clean-sessions` slash command for Claude Code CLI that gives you:
+
+- A **soft-delete trash** with a **5-day recovery window** (auto-purged after)
+- **Age-bucket triage** (This week / Recent / Old / Archive) so you can nuke the oldest ones in one click
+- **Paginated browse** with per-page and total bulk actions
+- **Multi-session protection** — detects every running Claude Code process via `ps` + `lsof` and refuses to trash any of their active sessions
+- **Audit log** at `~/.claude/session-cleanup.log`
+
+Claude Code stores every session transcript as a `.jsonl` file under `~/.claude/projects/<encoded-cwd>/` and never cleans them up. Once you have a few hundred, manually managing them gets annoying. This fixes that.
 
 ## Install
 
@@ -133,6 +134,19 @@ Edit `commands/lib/clean_sessions.py`:
 - `purge-expired` and `purge-all` use `shutil.rmtree` only on paths verified (via `Path.resolve().relative_to()`) to be inside `~/.claude/.session-trash/`
 - The helper never calls `rm -rf` on user input or pattern-matched paths
 - `trash-older-than` auto-filters out the protected sessions before calling the underlying `trash` op
+
+## What this won't cover
+
+My setup is macOS + a few hundred sessions at most. If yours looks different, heads up:
+
+- **Linux should work but I haven't actually run it there.** The code has `/proc` paths for Linux but I don't use it.
+- **Relies on Claude Code's internal storage** (`~/.claude/projects/*.jsonl`). Not a public API. If Anthropic moves things around this breaks until I update.
+- **Not fast on thousands of sessions.** Bulk deletes re-check running-session state per file → perf cliff at scale. Correct, not fast.
+- **Running-session protection is a heuristic.** Matches `claude` in the process command line. Wrapper scripts or renamed binaries might evade it. The tool refuses to mutate if it can't detect running sessions at all.
+- **Windows** — not tested, probably doesn't work.
+- **5-day trash retention is hardcoded.** Edit `RETENTION_DAYS` in the Python helper if you want different.
+
+Open an issue if something breaks on your setup.
 
 ## License
 
