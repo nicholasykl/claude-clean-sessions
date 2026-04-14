@@ -21,7 +21,7 @@ Claude Code stores every session transcript as a `.jsonl` file under `~/.claude/
 ## Install
 
 ```bash
-git clone https://github.com/<your-user>/claude-clean-sessions.git
+git clone https://github.com/nicholasykl/claude-clean-sessions.git
 cd claude-clean-sessions
 ./install.sh
 ```
